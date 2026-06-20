@@ -1,14 +1,15 @@
 [
-  { "id": "outram-mrt-exit", "label": "Outram Park MRT Exit 4", "aliases": ["mrt", "outram mrt"], "building": "MRT", "level": 1, "lat": 1.2803, "lng": 103.8397, "x": 10, "y": 80, "type": "entrance" },
-  { "id": "sgh-block5-l1", "label": "SGH Block 5 Level 1", "aliases": ["block 5"], "building": "SGH", "level": 1, "lat": 1.2796, "lng": 103.8352, "x": 35, "y": 58, "type": "junction" },
-  { "id": "sgh-block7-l1-lobby", "label": "SGH Block 7 Level 1 lobby", "aliases": ["block 7 lobby"], "building": "SGH", "level": 1, "lat": 1.2790, "lng": 103.8358, "x": 55, "y": 50, "type": "lobby" },
-  { "id": "sgh-block7-lift", "label": "SGH Block 7 lifts", "aliases": ["block 7 lift"], "building": "SGH", "level": 1, "lat": null, "lng": null, "x": 63, "y": 48, "type": "lift" },
-  { "id": "sgh-block7-b1", "label": "SGH Block 7 Basement 1", "aliases": ["block 7 basement"], "building": "SGH", "level": -1, "lat": null, "lng": null, "x": 62, "y": 48, "type": "junction" },
-  { "id": "sgh-block3-b1", "label": "SGH Block 3 Basement 1", "aliases": ["block 3 basement", "kopitiam basement"], "building": "SGH", "level": -1, "lat": null, "lng": null, "x": 45, "y": 50, "type": "junction" },
-  { "id": "linkway-nhcs-sgh-b1", "label": "NHCS–SGH basement linkway", "aliases": ["underground linkway", "basement linkway"], "building": "LINK", "level": -1, "lat": null, "lng": null, "x": 74, "y": 49, "type": "junction" },
-  { "id": "nhcs-b1-lift", "label": "NHCS Basement 1 lifts", "aliases": ["nhcs basement lift"], "building": "NHCS", "level": -1, "lat": null, "lng": null, "x": 86, "y": 49, "type": "lift" },
-  { "id": "nhcs-l1-lobby", "label": "NHCS Level 1 main lobby", "aliases": ["heart centre lobby", "nhcs lobby"], "building": "NHCS", "level": 1, "lat": 1.2789, "lng": 103.8410, "x": 90, "y": 48, "type": "lobby" },
-  { "id": "nhcs-l1-entrance", "label": "NHCS main entrance (drop-off)", "aliases": ["nhcs entrance", "heart centre entrance"], "building": "NHCS", "level": 1, "lat": 1.2791, "lng": 103.8412, "x": 84, "y": 42, "type": "entrance" },
-  { "id": "ncc-l1-lobby", "label": "NCC Level 1 lobby", "aliases": ["cancer centre lobby", "ncc lobby"], "building": "NCC", "level": 1, "lat": 1.2784, "lng": 103.8405, "x": 90, "y": 68, "type": "lobby" },
-  { "id": "bus-stop-outram", "label": "Bus stop opp SGH (Outram Rd)", "aliases": ["bus stop"], "building": "EXT", "level": 1, "lat": 1.2808, "lng": 103.8366, "x": 8, "y": 15, "type": "entrance" }
+  { "id": "outram-mrt-exit", "label": "Outram Park MRT Exit 4", "aliases": ["mrt", "outram mrt"], "building": "MRT", "level": 1, "lat": 1.2803, "lng": 103.8397, "x": 15, "y": 78, "type": "entrance" },
+  { "id": "sgh-block5-l1", "label": "SGH Block 5 Level 1", "aliases": ["block 5"], "building": "SGH", "level": 1, "lat": 1.2796, "lng": 103.8352, "x": 40, "y": 50, "type": "junction" },
+  { "id": "sgh-block7-l1-lobby", "label": "SGH Block 7 Level 1 lobby", "aliases": ["block 7 lobby"], "building": "SGH", "level": 1, "lat": 1.2790, "lng": 103.8358, "x": 60, "y": 32, "type": "lobby" },
+  { "id": "sgh-block7-lift", "label": "SGH Block 7 lifts", "aliases": ["block 7 lift"], "building": "SGH", "level": 1, "lat": null, "lng": null, "x": 60, "y": 68, "type": "lift" },
+  { "id": "sgh-block7-b1", "label": "SGH Block 7 Basement 1", "aliases": ["block 7 basement"], "building": "SGH", "level": -1, "lat": null, "lng": null, "x": 45, "y": 68, "type": "junction" },
+  { "id": "sgh-block3-b1", "label": "SGH Block 3 Basement 1", "aliases": ["block 3 basement", "kopitiam basement"], "building": "SGH", "level": -1, "lat": null, "lng": null, "x": 22, "y": 35, "type": "junction" },
+  { "id": "linkway-nhcs-sgh-b1", "label": "NHCS–SGH basement linkway", "aliases": ["underground linkway", "basement linkway"], "building": "LINK", "level": -1, "lat": null, "lng": null, "x": 68, "y": 42, "type": "junction" },
+  { "id": "nhcs-b1-lift", "label": "NHCS Basement 1 lifts", "aliases": ["nhcs basement lift"], "building": "NHCS", "level": -1, "lat": null, "lng": null, "x": 88, "y": 62, "type": "lift" },
+  { "id": "nhcs-l1-lobby", "label": "NHCS Level 1 main lobby", "aliases": ["heart centre lobby", "nhcs lobby"], "building": "NHCS", "level": 1, "lat": 1.2789, "lng": 103.8410, "x": 88, "y": 58, "type": "lobby" },
+  { "id": "nhcs-l1-entrance", "label": "NHCS main entrance (drop-off)", "aliases": ["nhcs entrance", "heart centre entrance"], "building": "NHCS", "level": 1, "lat": 1.2791, "lng": 103.8412, "x": 84, "y": 28, "type": "entrance" },
+  { "id": "nhcs-l2-cafe", "label": "NHCS Level 2 cafe", "aliases": ["nhcs cafe", "heart centre cafe", "cafe level 2"], "building": "NHCS", "level": 2, "lat": null, "lng": null, "x": 50, "y": 50, "type": "landmark" },
+  { "id": "ncc-l1-lobby", "label": "NCC Level 1 lobby", "aliases": ["cancer centre lobby", "ncc lobby"], "building": "NCC", "level": 1, "lat": 1.2784, "lng": 103.8405, "x": 84, "y": 85, "type": "lobby" },
+  { "id": "bus-stop-outram", "label": "Bus stop opp SGH (Outram Rd)", "aliases": ["bus stop"], "building": "EXT", "level": 1, "lat": 1.2808, "lng": 103.8366, "x": 15, "y": 20, "type": "entrance" }
 ]

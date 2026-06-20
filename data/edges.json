@@ -10,5 +10,6 @@
   { "id": "e-009", "from": "nhcs-l1-lobby", "to": "nhcs-l1-entrance", "path_type": "indoor", "walk_time_minutes": 1, "accessible": true, "oneway": false, "notes": "", "last_verified": "2026-06-20" },
   { "id": "e-010", "from": "nhcs-l1-entrance", "to": "ncc-l1-lobby", "path_type": "sheltered", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Covered link to cancer centre", "last_verified": "2026-06-20" },
   { "id": "e-011", "from": "nhcs-l1-entrance", "to": "bus-stop-outram", "path_type": "outdoor", "walk_time_minutes": 4, "accessible": true, "oneway": false, "notes": "Exposed pavement, no shelter", "last_verified": "2026-06-20" },
-  { "id": "e-012", "from": "sgh-block5-l1", "to": "bus-stop-outram", "path_type": "outdoor", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Exposed crossing", "last_verified": "2026-06-20" }
+  { "id": "e-012", "from": "sgh-block5-l1", "to": "bus-stop-outram", "path_type": "outdoor", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Exposed crossing", "last_verified": "2026-06-20" },
+  { "id": "e-013", "from": "nhcs-l1-lobby", "to": "nhcs-l2-cafe", "path_type": "indoor", "walk_time_minutes": 2, "accessible": true, "oneway": false, "notes": "Lift / escalator up to Level 2 cafe", "last_verified": "2026-06-20" }
 ]

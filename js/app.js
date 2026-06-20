@@ -221,6 +221,16 @@ function mapSVG(level) {
   return `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" width="100%" role="img" aria-label="${esc(summary)}">${zones}${corridors}${routeSegs}${pins}${handoffs}</svg>`;
 }
 
+function stepRowHTML(row) {
+  if (row.kind === 'start') {
+    return `<li class="step"><span class="dot dot-start"></span><div><strong>${esc(row.label)}</strong><br><span class="sub">Start</span></div></li>`;
+  }
+  const meta = PATH_TYPE_META[row.pathType] || { color: 'var(--muted)', label: row.pathType };
+  const arrive = row.kind === 'end' ? ' (arrive)' : '';
+  const note = row.notes ? ` · ${esc(row.notes)}` : '';
+  return `<li class="step"><span class="dot" style="background:${meta.color}"></span><div><strong>${esc(row.label)}${arrive}</strong><br><span class="sub">${esc(meta.label)} · ${row.minutes} min${note}</span></div></li>`;
+}
+
 function wireNearbyCats() {
   const cats = ['all', ...Object.keys(CATEGORY_META)];
   const box = $('#nearby-cats');

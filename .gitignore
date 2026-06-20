@@ -9,6 +9,9 @@ Thumbs.db
 node_modules/
 npm-debug.log*
 
+# Local Claude Code preview/tooling config
+.claude/
+
 # Ingestion staging output (reviewed, then merged into data/ by a human)
 ingestion/staging/*.json
 !ingestion/staging/.gitkeep

@@ -67,6 +67,40 @@ support (§10).
 | **feedback** | `js/feedback.js` — builds a prefilled **GitHub issue / mailto** URL ("this route is wrong/closed"). No backend in v1. | — |
 | **client** | `index.html`, `css/styles.css`, `js/app.js` + UI helpers, `manifest.json`, `sw.js`, icons. | all of the above |
 
+### 4.1 Ingestion & location capture (Termux backend)
+
+The patient app stays fully static, but a browser page can't write files — so
+ingestion uses a **tiny, local, pure-Python HTTP server** (`ingestion/server.py`,
+stdlib `http.server` only, no deps, no cloud) that runs *only while mapping*:
+
+- `GET /` → serve `ingestion/index.html` (the mapping form).
+- `POST /waypoint` → append the record to `ingestion/staging/session-YYYYMMDD.json`.
+- `GET /nodes` → return current `data/nodes.json` so **connects-to** is a dropdown
+  of real nodes, not free text.
+- `GET /gps` *(optional)* → shell out to `termux-location` and return its JSON
+  (fallback to browser geolocation; also yields `accuracy`/`provider`).
+
+**Getting a fix.** Default to the browser `navigator.geolocation` in Chrome on the
+phone (no extra app); `termux-location -p gps|network|passive` (Termux:API) is the
+fallback. Termux:API needs `pkg install termux-api` **and** the Termux:API app from
+**F-Droid** (same source as Termux) with Location permission.
+
+**Indoors/underground reality.** GPS will not fix underground (timeout / huge
+`accuracy`). Outdoors: store `lat/lng` + `accuracy`. Indoors/underground: leave
+`lat/lng` null and rely on graph topology (`connects-to` + `walk_time`); optionally
+anchor to the last good outdoor fix. Routing uses edge weights, not coordinates, so
+this is fine — coordinates are only for the outdoor map view.
+
+**Cheap signals captured on-site** (stored on the waypoint; can't be re-collected
+later): **stopwatch walk-time** ("start" at A → "arrive" at B auto-fills
+`walk_time_minutes`); **barometer** delta (`termux-sensor`) to auto-hint level/
+`underground` changes; **WiFi fingerprint** (`termux-wifi-scaninfo`, BSSID+RSSI per
+waypoint) reserved for a *future* indoor-positioning feature, ignored in v1.
+
+**Session setup:** `pkg install python termux-api`, install Termux:API (F-Droid),
+grant Location, `termux-setup-storage`, `termux-wake-lock`, exempt Termux from
+battery optimization.
+
 ## 5. Data schema
 
 Plain JSON (no DB needed at this scale). `last_verified` is mandatory everywhere —
@@ -192,6 +226,7 @@ hospital-wayfinder/
 │   └── pwa.js               # service-worker registration
 ├── data/  nodes.json  edges.json  pois.json
 ├── ingestion/
+│   ├── server.py                    # tiny stdlib HTTP server (the Termux backend)
 │   ├── index.html  ingest.js        # local mapping form (used while walking)
 │   └── staging/.gitkeep             # staged output (gitignored)
 ├── tools/

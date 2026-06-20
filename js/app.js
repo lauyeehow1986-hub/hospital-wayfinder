@@ -2,17 +2,23 @@ import { buildGraph, findRoute, summarizeRoute } from './wayfinding.js';
 import { indexById, searchNodes } from './mapData.js';
 import { poisNearNode } from './places.js';
 import { PATH_TYPE_META, CATEGORY_META, modeToOpts, routeToRows, comfortSegments, poiRow } from './render.js';
+import { levelsPresent, levelLabel, nodesOnLevel, edgesOnLevel, buildingZones, fitTransform, project, routeByLevel } from './mapView.js';
 import { getPrefs, savePrefs, getRecent, pushRecent } from './platform.js';
 import './pwa.js';
 
 const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const state = { fromId: null, toId: null, mode: 'sheltered', nearbyRef: null, nearbyCat: 'all' };
+const state = { fromId: null, toId: null, mode: 'sheltered', nearbyRef: null, nearbyCat: 'all', routeView: 'map' };
 let graph = null;
 let nodes = [];
 let pois = [];
 let nodeIndex = new Map();
+let edges = [];
+let lastRoute = null;
+const MAP_W = 300;
+const MAP_H = 220;
+const MAP_PAD = 18;
 
 async function init() {
   applyPrefs(getPrefs());
@@ -24,6 +30,7 @@ async function init() {
     ]);
     nodes = n;
     pois = p;
+    edges = e;
     graph = buildGraph(n, e);
     nodeIndex = indexById(n);
   } catch {
@@ -114,27 +121,104 @@ function renderFromChips() {
 
 function renderRoute() {
   const out = $('#route-result');
-  if (!state.fromId || !state.toId) { out.innerHTML = ''; return; }
-  if (state.fromId === state.toId) { out.innerHTML = '<p class="msg">You are already there.</p>'; return; }
+  if (!state.fromId || !state.toId) { out.innerHTML = ''; lastRoute = null; return; }
+  if (state.fromId === state.toId) { out.innerHTML = '<p class="msg">You are already there.</p>'; lastRoute = null; return; }
   const result = findRoute(graph, state.fromId, state.toId, modeToOpts(state.mode));
-  if (!result) { out.innerHTML = '<p class="msg">No route found — the map may be incomplete here. Try a nearby landmark.</p>'; return; }
+  if (!result) { out.innerHTML = '<p class="msg">No route found — the map may be incomplete here. Try a nearby landmark.</p>'; lastRoute = null; return; }
   const summary = summarizeRoute(result);
-  const segs = comfortSegments(summary);
-  const rows = routeToRows(graph, result);
+  lastRoute = {
+    result,
+    summary,
+    rows: routeToRows(graph, result),
+    map: routeByLevel(graph, result),
+    activeLevel: null,
+  };
   out.innerHTML = `
     <div class="banner">${esc(summary.text)}</div>
-    <div class="comfort" aria-hidden="true">${segs.map((s) => `<span style="width:${s.pct}%;background:${s.color}"></span>`).join('')}</div>
-    <ol class="steps">${rows.map(stepRowHTML).join('')}</ol>`;
+    <div class="comfort" aria-hidden="true">${comfortSegments(summary).map((s) => `<span style="width:${s.pct}%;background:${s.color}"></span>`).join('')}</div>
+    <div class="chips viewtoggle">
+      <button class="chip" data-view="map" aria-pressed="${state.routeView !== 'steps'}">Map</button>
+      <button class="chip" data-view="steps" aria-pressed="${state.routeView === 'steps'}">Steps</button>
+    </div>
+    <div id="route-view"></div>`;
+  out.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
+    state.routeView = b.dataset.view;
+    renderRouteView(state.routeView);
+  }));
+  renderRouteView(state.routeView);
 }
 
-function stepRowHTML(row) {
-  if (row.kind === 'start') {
-    return `<li class="step"><span class="dot dot-start"></span><div><strong>${esc(row.label)}</strong><br><span class="sub">Start</span></div></li>`;
+function renderRouteView(view) {
+  document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+  const host = $('#route-view');
+  if (view === 'steps') {
+    host.innerHTML = `<ol class="steps">${lastRoute.rows.map(stepRowHTML).join('')}</ol>`;
+    return;
   }
-  const meta = PATH_TYPE_META[row.pathType] || { color: 'var(--muted)', label: row.pathType };
-  const arrive = row.kind === 'end' ? ' (arrive)' : '';
-  const note = row.notes ? ` · ${esc(row.notes)}` : '';
-  return `<li class="step"><span class="dot" style="background:${meta.color}"></span><div><strong>${esc(row.label)}${arrive}</strong><br><span class="sub">${esc(meta.label)} · ${row.minutes} min${note}</span></div></li>`;
+  const levels = levelsPresent(nodes);
+  if (lastRoute.activeLevel == null) {
+    const startNode = nodeIndex.get(state.fromId);
+    lastRoute.activeLevel = startNode ? startNode.level : levels[0];
+  }
+  const switcher = levels.map((lvl) =>
+    `<button class="chip lvl" data-level="${lvl}" aria-pressed="${lvl === lastRoute.activeLevel}">${esc(levelLabel(lvl))}</button>`
+  ).join('');
+  host.innerHTML = `<div class="chips levels">${switcher}</div><div class="mapwrap">${mapSVG(lastRoute.activeLevel)}</div>`;
+  host.querySelectorAll('[data-level]').forEach((b) => b.addEventListener('click', () => {
+    lastRoute.activeLevel = Number(b.dataset.level);
+    renderRouteView('map');
+  }));
+}
+
+function mapSVG(level) {
+  const levelNodes = nodesOnLevel(nodes, level);
+  if (!levelNodes.length) return '<p class="msg">No map for this level.</p>';
+  const t = fitTransform(levelNodes, MAP_W, MAP_H, MAP_PAD);
+  const P = (p) => project(p, t);
+
+  const zones = buildingZones(levelNodes).map((z) => {
+    const a = P({ x: z.minX, y: z.minY });
+    const b = P({ x: z.maxX, y: z.maxY });
+    const x = Math.min(a.x, b.x) - 10;
+    const y = Math.min(a.y, b.y) - 10;
+    const w = Math.abs(b.x - a.x) + 20;
+    const h = Math.abs(b.y - a.y) + 20;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="10" fill="var(--primary-tint)" stroke="var(--border)"/><text x="${(x + 8).toFixed(1)}" y="${(y + 16).toFixed(1)}" font-size="11" fill="var(--muted)">${esc(z.building)}</text>`;
+  }).join('');
+
+  const corridors = edgesOnLevel(edges, level, nodeIndex).map((e) => {
+    const a = P(nodeIndex.get(e.from));
+    const b = P(nodeIndex.get(e.to));
+    return `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="var(--border)" stroke-width="2"/>`;
+  }).join('');
+
+  const lvlRoute = lastRoute.map.byLevel[level] || { segments: [], nodes: [] };
+  const routeSegs = lvlRoute.segments.map((s) => {
+    const a = P({ x: s.x1, y: s.y1 });
+    const b = P({ x: s.x2, y: s.y2 });
+    const color = (PATH_TYPE_META[s.pathType] || {}).color || '#5b727c';
+    return `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${color}" stroke-width="6" stroke-linecap="round"/>`;
+  }).join('');
+
+  const pins = lvlRoute.nodes.map((n) => {
+    const p = P(n);
+    if (n.role === 'start') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="var(--primary)"/><text x="${(p.x + 11).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11" fill="var(--text)">You are here</text>`;
+    if (n.role === 'end') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="#d4543e"/><text x="${(p.x + 11).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11" fill="var(--text)">Destination</text>`;
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="var(--muted)"/>`;
+  }).join('');
+
+  const handoffs = lastRoute.map.changes.filter((c) => c.fromLevel === level || c.toLevel === level).map((c) => {
+    const anchorId = c.fromLevel === level ? c.atNodeId : c.nextNodeId;
+    const node = nodeIndex.get(anchorId);
+    if (!node || typeof node.x !== 'number') return '';
+    const p = P(node);
+    const other = c.fromLevel === level ? c.toLevel : c.fromLevel;
+    const arrow = c.fromLevel === level ? (c.direction === 'down' ? '↓' : '↑') : (c.direction === 'down' ? '↑' : '↓');
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="10" fill="#7c3aed"/><text x="${p.x.toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="12" fill="#fff" text-anchor="middle">${arrow}</text><text x="${(p.x + 13).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="10.5" fill="#7c3aed">to ${esc(levelLabel(other))}</text>`;
+  }).join('');
+
+  const summary = lastRoute.summary ? lastRoute.summary.text : '';
+  return `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" width="100%" role="img" aria-label="${esc(summary)}">${zones}${corridors}${routeSegs}${pins}${handoffs}</svg>`;
 }
 
 function wireNearbyCats() {

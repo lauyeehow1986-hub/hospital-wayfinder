@@ -11,6 +11,9 @@ export function validateGraph({ nodes, edges, pois = [] }) {
     if (nodeIds.has(n.id)) errors.push(`Duplicate node id: ${n.id}`);
     nodeIds.add(n.id);
     if (!n.label) errors.push(`Node ${n.id} missing label`);
+    if (typeof n.x !== 'number' || typeof n.y !== 'number') {
+      warnings.push(`Node ${n.id} missing x/y (not on floor map)`);
+    }
   }
 
   const edgeIds = new Set();

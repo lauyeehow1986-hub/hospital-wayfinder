@@ -33,6 +33,12 @@ test('validateGraph flags duplicate ids and bad walk time', () => {
   assert.ok(r.errors.some((e) => e.includes('walk_time_minutes')));
 });
 
+test('validateGraph warns when a node lacks x/y coordinates', () => {
+  const r = validateGraph({ nodes: [{ id: 'a', label: 'A' }], edges: [], pois: [] });
+  assert.ok(r.warnings.some((w) => w.includes('x/y')));
+  assert.equal(r.ok, true);
+});
+
 test('validateGraph warns on missing last_verified, POI bad node is an error', () => {
   const r = validateGraph({
     nodes: goodNodes,

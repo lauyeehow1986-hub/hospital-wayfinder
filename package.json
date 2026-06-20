@@ -1,0 +1,11 @@
+{
+  "name": "hospital-wayfinder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline-first wayfinding + places-of-interest PWA for the Outram hospital cluster.",
+  "scripts": {
+    "test": "node --test",
+    "validate": "node tools/validate-graph.js"
+  }
+}

@@ -1,0 +1,14 @@
+[
+  { "id": "e-001", "from": "outram-mrt-exit", "to": "sgh-block5-l1", "path_type": "sheltered", "walk_time_minutes": 5, "accessible": true, "oneway": false, "notes": "Sheltered walkway from MRT", "last_verified": "2026-06-20" },
+  { "id": "e-002", "from": "sgh-block5-l1", "to": "sgh-block7-l1-lobby", "path_type": "indoor", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Air-con corridor", "last_verified": "2026-06-20" },
+  { "id": "e-003", "from": "sgh-block7-l1-lobby", "to": "sgh-block7-lift", "path_type": "indoor", "walk_time_minutes": 1, "accessible": true, "oneway": false, "notes": "", "last_verified": "2026-06-20" },
+  { "id": "e-004", "from": "sgh-block7-lift", "to": "sgh-block7-b1", "path_type": "indoor", "walk_time_minutes": 1, "accessible": true, "oneway": false, "notes": "Lift to basement", "last_verified": "2026-06-20" },
+  { "id": "e-005", "from": "sgh-block7-b1", "to": "sgh-block3-b1", "path_type": "underground", "walk_time_minutes": 4, "accessible": true, "oneway": false, "notes": "Basement passage past kopitiam", "last_verified": "2026-06-20" },
+  { "id": "e-006", "from": "sgh-block7-b1", "to": "linkway-nhcs-sgh-b1", "path_type": "underground", "walk_time_minutes": 6, "accessible": true, "oneway": false, "notes": "Basement linkway, 24h, wheelchair accessible", "last_verified": "2026-06-20" },
+  { "id": "e-007", "from": "linkway-nhcs-sgh-b1", "to": "nhcs-b1-lift", "path_type": "underground", "walk_time_minutes": 2, "accessible": true, "oneway": false, "notes": "", "last_verified": "2026-06-20" },
+  { "id": "e-008", "from": "nhcs-b1-lift", "to": "nhcs-l1-lobby", "path_type": "indoor", "walk_time_minutes": 1, "accessible": true, "oneway": false, "notes": "Lift to level 1", "last_verified": "2026-06-20" },
+  { "id": "e-009", "from": "nhcs-l1-lobby", "to": "nhcs-l1-entrance", "path_type": "indoor", "walk_time_minutes": 1, "accessible": true, "oneway": false, "notes": "", "last_verified": "2026-06-20" },
+  { "id": "e-010", "from": "nhcs-l1-entrance", "to": "ncc-l1-lobby", "path_type": "sheltered", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Covered link to cancer centre", "last_verified": "2026-06-20" },
+  { "id": "e-011", "from": "nhcs-l1-entrance", "to": "bus-stop-outram", "path_type": "outdoor", "walk_time_minutes": 4, "accessible": true, "oneway": false, "notes": "Exposed pavement, no shelter", "last_verified": "2026-06-20" },
+  { "id": "e-012", "from": "sgh-block5-l1", "to": "bus-stop-outram", "path_type": "outdoor", "walk_time_minutes": 3, "accessible": true, "oneway": false, "notes": "Exposed crossing", "last_verified": "2026-06-20" }
+]

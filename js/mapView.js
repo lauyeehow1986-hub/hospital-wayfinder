@@ -96,3 +96,11 @@ export function routeByLevel(graph, result) {
 
   return { byLevel, changes };
 }
+
+// The handoff markers to draw on a level: only DEPARTURES (where the route
+// leaves this level), so a marker never lands on an arrival/destination pin.
+export function handoffsForLevel(changes, level) {
+  return changes
+    .filter((c) => c.fromLevel === level)
+    .map((c) => ({ atNodeId: c.atNodeId, toLevel: c.toLevel, direction: c.direction }));
+}

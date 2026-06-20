@@ -11,6 +11,7 @@ import {
   fitTransform,
   project,
   routeByLevel,
+  handoffsForLevel,
 } from '../js/mapView.js';
 
 const nodes = [
@@ -86,4 +87,13 @@ test('routeByLevel splits segments per level and records cross-level changes', (
 
 test('routeByLevel handles a null result', () => {
   assert.deepEqual(routeByLevel(graph, null), { byLevel: {}, changes: [] });
+});
+
+test('handoffsForLevel returns only departures from the given level', () => {
+  const changes = [
+    { atNodeId: 'lift', nextNodeId: 'b7b1', fromLevel: 1, toLevel: -1, direction: 'down' },
+    { atNodeId: 'nb1', nextNodeId: 'nlob', fromLevel: -1, toLevel: 1, direction: 'up' },
+  ];
+  assert.deepEqual(handoffsForLevel(changes, 1), [{ atNodeId: 'lift', toLevel: -1, direction: 'down' }]);
+  assert.deepEqual(handoffsForLevel(changes, -1), [{ atNodeId: 'nb1', toLevel: 1, direction: 'up' }]);
 });

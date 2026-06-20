@@ -1,4 +1,4 @@
-const CACHE = 'hw-v0.3';
+const CACHE = 'hw-v0.4';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './css/styles.css',

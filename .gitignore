@@ -1,0 +1,22 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Ingestion staging output (reviewed, then merged into data/ by a human)
+ingestion/staging/*.json
+!ingestion/staging/.gitkeep
+
+# Local secrets (e.g. Google Places API key for optional proxy.py)
+.env
+secrets.json
+
+# Python
+__pycache__/
+*.pyc

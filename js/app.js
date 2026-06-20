@@ -2,7 +2,7 @@ import { buildGraph, findRoute, summarizeRoute } from './wayfinding.js';
 import { indexById, searchNodes } from './mapData.js';
 import { poisNearNode } from './places.js';
 import { PATH_TYPE_META, CATEGORY_META, modeToOpts, routeToRows, comfortSegments, poiRow } from './render.js';
-import { levelsPresent, levelLabel, nodesOnLevel, edgesOnLevel, buildingZones, fitTransform, project, routeByLevel } from './mapView.js';
+import { levelsPresent, levelLabel, nodesOnLevel, edgesOnLevel, buildingZones, fitTransform, project, routeByLevel, handoffsForLevel } from './mapView.js';
 import { getPrefs, savePrefs, getRecent, pushRecent } from './platform.js';
 import './pwa.js';
 
@@ -16,9 +16,9 @@ let pois = [];
 let nodeIndex = new Map();
 let edges = [];
 let lastRoute = null;
-const MAP_W = 300;
-const MAP_H = 220;
-const MAP_PAD = 18;
+const MAP_W = 340;
+const MAP_H = 300;
+const MAP_PAD = 26;
 
 async function init() {
   applyPrefs(getPrefs());
@@ -170,20 +170,31 @@ function renderRouteView(view) {
   }));
 }
 
+// An edge-aware text label: flips to the left of its anchor near the right edge
+// so it never overflows the viewBox. White halo keeps it legible over lines.
+function mapLabel(p, text, color) {
+  const right = p.x > MAP_W * 0.6;
+  const tx = right ? p.x - 12 : p.x + 12;
+  const anchor = right ? 'end' : 'start';
+  return `<text x="${tx.toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11" fill="${color}" text-anchor="${anchor}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${esc(text)}</text>`;
+}
+
 function mapSVG(level) {
   const levelNodes = nodesOnLevel(nodes, level);
   if (!levelNodes.length) return '<p class="msg">No map for this level.</p>';
   const t = fitTransform(levelNodes, MAP_W, MAP_H, MAP_PAD);
   const P = (p) => project(p, t);
 
-  const zones = buildingZones(levelNodes).map((z) => {
+  // Only draw zones for buildings that span an area (2+ nodes); single-node
+  // buildings would be tiny boxes that just add clutter.
+  const zones = buildingZones(levelNodes).filter((z) => z.maxX > z.minX || z.maxY > z.minY).map((z) => {
     const a = P({ x: z.minX, y: z.minY });
     const b = P({ x: z.maxX, y: z.maxY });
-    const x = Math.min(a.x, b.x) - 10;
-    const y = Math.min(a.y, b.y) - 10;
-    const w = Math.abs(b.x - a.x) + 20;
-    const h = Math.abs(b.y - a.y) + 20;
-    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="10" fill="var(--primary-tint)" stroke="var(--border)"/><text x="${(x + 8).toFixed(1)}" y="${(y + 16).toFixed(1)}" font-size="11" fill="var(--muted)">${esc(z.building)}</text>`;
+    const x = Math.min(a.x, b.x) - 12;
+    const y = Math.min(a.y, b.y) - 12;
+    const w = Math.abs(b.x - a.x) + 24;
+    const h = Math.abs(b.y - a.y) + 24;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="12" fill="var(--primary-tint)" stroke="var(--border)"/><text x="${(x + 8).toFixed(1)}" y="${(y + 15).toFixed(1)}" font-size="10" fill="var(--muted)">${esc(z.building)}</text>`;
   }).join('');
 
   const corridors = edgesOnLevel(edges, level, nodeIndex).map((e) => {
@@ -200,21 +211,24 @@ function mapSVG(level) {
     return `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${color}" stroke-width="6" stroke-linecap="round"/>`;
   }).join('');
 
+  // Departures only — never draws on top of an arrival/destination pin.
+  const handoffList = handoffsForLevel(lastRoute.map.changes, level);
+  const handoffIds = new Set(handoffList.map((h) => h.atNodeId));
+
   const pins = lvlRoute.nodes.map((n) => {
     const p = P(n);
-    if (n.role === 'start') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="var(--primary)"/><text x="${(p.x + 11).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11" fill="var(--text)">You are here</text>`;
-    if (n.role === 'end') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="#d4543e"/><text x="${(p.x + 11).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="11" fill="var(--text)">Destination</text>`;
+    if (n.role === 'start') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="var(--primary)"/>${mapLabel(p, 'You are here', 'var(--text)')}`;
+    if (n.role === 'end') return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="#d4543e"/>${mapLabel(p, 'Destination', 'var(--text)')}`;
+    if (handoffIds.has(n.id)) return ''; // a handoff marker is drawn at this node instead
     return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="var(--muted)"/>`;
   }).join('');
 
-  const handoffs = lastRoute.map.changes.filter((c) => c.fromLevel === level || c.toLevel === level).map((c) => {
-    const anchorId = c.fromLevel === level ? c.atNodeId : c.nextNodeId;
-    const node = nodeIndex.get(anchorId);
+  const handoffs = handoffList.map((h) => {
+    const node = nodeIndex.get(h.atNodeId);
     if (!node || typeof node.x !== 'number') return '';
     const p = P(node);
-    const other = c.fromLevel === level ? c.toLevel : c.fromLevel;
-    const arrow = c.fromLevel === level ? (c.direction === 'down' ? '↓' : '↑') : (c.direction === 'down' ? '↑' : '↓');
-    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="10" fill="#7c3aed"/><text x="${p.x.toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="12" fill="#fff" text-anchor="middle">${arrow}</text><text x="${(p.x + 13).toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="10.5" fill="#7c3aed">to ${esc(levelLabel(other))}</text>`;
+    const arrow = h.direction === 'down' ? '↓' : '↑';
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="10" fill="#7c3aed"/><text x="${p.x.toFixed(1)}" y="${(p.y + 4).toFixed(1)}" font-size="12" fill="#fff" text-anchor="middle">${arrow}</text>${mapLabel(p, `to ${levelLabel(h.toLevel)}`, '#7c3aed')}`;
   }).join('');
 
   const summary = lastRoute.summary ? lastRoute.summary.text : '';

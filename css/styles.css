@@ -59,4 +59,4 @@ nav.tabs button[aria-selected="true"] { color: var(--primary); font-weight: 500;
 .viewtoggle .chip { flex: 1; text-align: center; }
 .chips.levels { margin: 8px 0; }
 .mapwrap { background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius); padding: 8px; }
-.mapwrap svg { width: 100%; height: auto; display: block; }
+.mapwrap svg { width: 100%; height: auto; min-height: 280px; display: block; }

@@ -13,16 +13,25 @@ prefilled link the user sends from their own GitHub/email.
 
 ## 2. Mechanism
 
-Two channels, user chooses (per decision): a **prefilled GitHub issue** and a
-**prefilled `mailto:`**. Config lives at the top of `js/feedback.js`:
+Three channels, user chooses: a **prefilled GitHub issue**, a **prefilled `mailto:`**,
+and a **Telegram** link to the bot (Plan 6). Config lives at the top of
+`js/feedback.js`:
 
 ```js
-export const FEEDBACK = { repo: 'lauyeehow1986-hub/hospital-wayfinder', email: 'yhbot86@gmail.com' };
+export const FEEDBACK = {
+  repo: 'lauyeehow1986-hub/hospital-wayfinder',
+  email: 'yhbot86@gmail.com',
+  telegram: '', // bot username (e.g. 'OutramWayfinderBot'); set once Plan 6 bot exists
+};
 ```
 
 - `repo` → GitHub issues (no personal email exposed; structured/trackable).
-- `email` → a throwaway address (public-repo-safe). **The Email button renders only
-  when `email` is a non-empty value**, so clearing it cleanly disables that channel.
+- `email` → a throwaway address (public-repo-safe).
+- `telegram` → opens `https://t.me/<username>` (the Plan 6 bot). Telegram deep links
+  can't prefill a long route message, so this channel is free-text (the bot
+  understands questions + feedback); GitHub/email carry the full route context.
+- **Each button renders only when its config value is non-empty**, so unset channels
+  (e.g. `telegram` until the bot is deployed) are cleanly hidden.
 
 ## 3. `js/feedback.js` (pure, unit-tested)
 
@@ -36,15 +45,17 @@ export const FEEDBACK = { repo: 'lauyeehow1986-hub/hospital-wayfinder', email: '
   `https://github.com/<repo>/issues/new?title=…&body=…&labels=<label>` (all
   `encodeURIComponent`-encoded; `label` default `route-report`).
 - `buildMailtoUrl(email, subject, body)` → `mailto:<email>?subject=…&body=…`.
+- `buildTelegramUrl(username)` → `https://t.me/<username>` (strips a leading `@`).
 
 ## 4. UI (`js/app.js`)
 
 - **Route result:** a "Report a problem" text button beneath the Map/Steps view.
-  Click → an inline panel (normal flow, no `position: fixed`): a short prompt + two
-  buttons — **Email** (only if `FEEDBACK.email` set) and **GitHub issue** — each
-  opening the prefilled URL built from the current route (`lastRoute`).
-- **About tab:** a "Report a problem / suggest a place" button → the same two
-  channels via `generalReport` (no route context).
+  Click → an inline panel (normal flow, no `position: fixed`): a short prompt + up to
+  three buttons — **Email**, **GitHub issue**, **Telegram** — each rendered only if
+  its config is set, opening the prefilled URL built from the current route
+  (`lastRoute`). (Telegram opens the bot chat; route context isn't prefilled there.)
+- **About tab:** a "Report a problem / suggest a place" button → the same channels via
+  `generalReport` (no route context).
 - Opening: `window.open(url, '_blank', 'noopener')` for the `https` GitHub link;
   `location.href = url` for `mailto:`.
 
@@ -58,10 +69,11 @@ export const FEEDBACK = { repo: 'lauyeehow1986-hub/hospital-wayfinder', email: '
 ## 6. Testing
 
 - **Node `--test`:** `buildIssueUrl` (contains `issues/new`, encoded title, label),
-  `buildMailtoUrl` (`mailto:` prefix, encoded subject/body), `routeReport` (title has
-  from→to; body includes mode + step labels + version), `generalReport`.
-- **Live:** route → Report → Email/GitHub open the correct prefilled targets; About
-  report works; Email button hidden when `FEEDBACK.email` is empty.
+  `buildMailtoUrl` (`mailto:` prefix, encoded subject/body), `buildTelegramUrl`
+  (strips `@`, `https://t.me/...`), `routeReport` (title has from→to; body includes
+  mode + step labels + version), `generalReport`.
+- **Live:** route → Report → buttons open the correct prefilled targets; About report
+  works; a channel's button is hidden when its config value is empty.
 
 ## 7. Files
 

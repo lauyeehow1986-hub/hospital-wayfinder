@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Wayfinder — mapping</title>
+  <style>
+    body { font: 400 16px/1.5 system-ui, sans-serif; margin: 0; padding: 14px; max-width: 560px; background: #f5f7f8; color: #1a2b32; }
+    h1 { font-size: 18px; }
+    label { font-size: 13px; color: #5b727c; display: block; margin-top: 8px; }
+    input, select { width: 100%; min-height: 42px; padding: 8px 10px; font-size: 15px; border: 1px solid #cdd8da; border-radius: 8px; background: #fff; box-sizing: border-box; }
+    .row { display: flex; gap: 8px; }
+    .row > div { flex: 1; }
+    .edgerow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border: 1px solid #dce5e7; border-radius: 8px; padding: 8px; margin-top: 6px; }
+    .edgerow input[type="checkbox"] { width: auto; min-height: 0; }
+    button { min-height: 44px; padding: 8px 14px; border: 1px solid #0f9488; background: #fff; color: #0f3d39; border-radius: 8px; font-size: 15px; }
+    button.primary { background: #0f9488; color: #fff; border-color: #0f9488; width: 100%; margin-top: 12px; }
+    #map svg { background: #fff; border: 1px solid #cdd8da; border-radius: 8px; touch-action: manipulation; }
+    #status { margin-top: 8px; font-weight: 500; min-height: 20px; }
+    .muted { color: #5b727c; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Add waypoint</h1>
+  <label>Landmark name</label>
+  <input id="label" placeholder="e.g. SGH Block 2 pharmacy">
+  <div class="row">
+    <div><label>Building</label><input id="building" list="buildinglist" placeholder="SGH"></div>
+    <div><label>Level</label><input id="level" type="number" value="1"></div>
+  </div>
+  <div class="row">
+    <div><label>Type</label>
+      <select id="type"><option>landmark</option><option>lobby</option><option>junction</option><option>lift</option><option>escalator</option><option>stairs</option><option>entrance</option></select>
+    </div>
+    <div><label>Aliases (comma-sep)</label><input id="aliases" placeholder="optional"></div>
+  </div>
+
+  <label>Tap your spot on the map (optional)</label>
+  <div id="map"></div>
+
+  <label>GPS (outdoor only)</label>
+  <div class="row" style="align-items:center">
+    <button id="grab-gps" type="button">Grab GPS</button>
+    <span id="gps-out" class="muted"></span>
+  </div>
+  <input id="lat" type="hidden"><input id="lng" type="hidden">
+
+  <label>Walk-time stopwatch</label>
+  <div class="row" style="align-items:center">
+    <button id="timer-start" type="button">Start</button>
+    <button id="timer-stop" type="button">Arrive</button>
+    <span id="timer-out" class="muted"></span>
+  </div>
+
+  <label>Connecting corridors</label>
+  <div id="edges"></div>
+  <button id="add-edge" type="button" style="margin-top:6px">+ another corridor</button>
+
+  <button id="save" class="primary" type="button">Save waypoint → staging</button>
+  <div id="status"></div>
+
+  <datalist id="nodelist"></datalist>
+  <datalist id="buildinglist"></datalist>
+  <script type="module" src="ingest.js"></script>
+</body>
+</html>

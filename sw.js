@@ -1,9 +1,9 @@
-const CACHE = 'hw-v0.5';
+const CACHE = 'hw-v0.6';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './css/styles.css',
   './js/app.js', './js/wayfinding.js', './js/mapData.js', './js/places.js',
-  './js/render.js', './js/platform.js', './js/mapView.js', './js/pwa.js',
+  './js/render.js', './js/platform.js', './js/mapView.js', './js/feedback.js', './js/pwa.js',
   './data/nodes.json', './data/edges.json', './data/pois.json', './data/meta.json',
   './icon-192.svg', './icon-512.svg',
 ];

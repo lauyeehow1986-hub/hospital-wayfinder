@@ -60,3 +60,8 @@ nav.tabs button[aria-selected="true"] { color: var(--primary); font-weight: 500;
 .chips.levels { margin: 8px 0; }
 .mapwrap { background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius); padding: 8px; }
 .mapwrap svg { width: 100%; height: auto; min-height: 280px; display: block; }
+.link-btn { background: transparent; border: 0; color: var(--primary); text-decoration: underline; padding: 10px 0; min-height: 44px; font-size: 14px; }
+.report-panel { background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius); padding: 12px; margin: 4px 0 12px; }
+.report-panel .sub { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+.rep-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.rep-btn { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 14px; border: var(--bw) solid var(--primary); color: var(--primary-deep); background: var(--surface); border-radius: var(--radius); text-decoration: none; font-size: 14px; }

@@ -64,6 +64,11 @@ export function project(point, t) {
   return { x: point.x * t.scale + t.offsetX, y: point.y * t.scale + t.offsetY };
 }
 
+// Inverse of project(): a screen-space point back to data/grid coords.
+export function unproject(point, t) {
+  return { x: (point.x - t.offsetX) / t.scale, y: (point.y - t.offsetY) / t.scale };
+}
+
 // Split a route into per-level geometry, plus the cross-level transitions.
 // Returns { byLevel: { [level]: { segments, nodes } }, changes: [...] }.
 export function routeByLevel(graph, result) {

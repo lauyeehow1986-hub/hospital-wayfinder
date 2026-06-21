@@ -10,6 +10,7 @@ import {
   buildingZones,
   fitTransform,
   project,
+  unproject,
   routeByLevel,
   handoffsForLevel,
 } from '../js/mapView.js';
@@ -87,6 +88,13 @@ test('routeByLevel splits segments per level and records cross-level changes', (
 
 test('routeByLevel handles a null result', () => {
   assert.deepEqual(routeByLevel(graph, null), { byLevel: {}, changes: [] });
+});
+
+test('unproject is the inverse of project', () => {
+  const t = fitTransform([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 0, y: 10 }], 110, 110, 10);
+  const back = unproject(project({ x: 7, y: 3 }, t), t);
+  assert.ok(Math.abs(back.x - 7) < 1e-9, `x=${back.x}`);
+  assert.ok(Math.abs(back.y - 3) < 1e-9, `y=${back.y}`);
 });
 
 test('handoffsForLevel returns only departures from the given level', () => {

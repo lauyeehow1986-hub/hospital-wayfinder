@@ -4,6 +4,7 @@ import { poisNearNode } from './places.js';
 import { PATH_TYPE_META, CATEGORY_META, modeToOpts, routeToRows, comfortSegments, poiRow } from './render.js';
 import { levelsPresent, levelLabel, nodesOnLevel, edgesOnLevel, buildingZones, fitTransform, project, routeByLevel, handoffsForLevel } from './mapView.js';
 import { getPrefs, savePrefs, getRecent, pushRecent } from './platform.js';
+import { FEEDBACK, routeReport, generalReport, buildIssueUrl, buildMailtoUrl, buildTelegramUrl } from './feedback.js';
 import './pwa.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -19,6 +20,7 @@ let lastRoute = null;
 const MAP_W = 340;
 const MAP_H = 300;
 const MAP_PAD = 26;
+const APP_VERSION = 'v0.6';
 
 async function init() {
   applyPrefs(getPrefs());
@@ -45,6 +47,7 @@ async function init() {
   wireSwap();
   wireNearbyCats();
   wireA11y();
+  wireAbout();
   renderFromChips();
 }
 
@@ -140,11 +143,27 @@ function renderRoute() {
       <button class="chip" data-view="map" aria-pressed="${state.routeView !== 'steps'}">Map</button>
       <button class="chip" data-view="steps" aria-pressed="${state.routeView === 'steps'}">Steps</button>
     </div>
-    <div id="route-view"></div>`;
+    <div id="route-view"></div>
+    <button class="link-btn" id="report-route" type="button">⚠ Report a problem</button>
+    <div class="report-panel" id="report-panel" hidden></div>`;
   out.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
     state.routeView = b.dataset.view;
     renderRouteView(state.routeView);
   }));
+  $('#report-route').addEventListener('click', () => {
+    const panel = $('#report-panel');
+    if (panel.hidden) {
+      panel.innerHTML = reportPanelHTML(routeReport({
+        fromLabel: nodeIndex.get(state.fromId).label,
+        toLabel: nodeIndex.get(state.toId).label,
+        mode: state.mode,
+        stepLabels: lastRoute.rows.map((r) => r.label),
+        summaryText: lastRoute.summary.text,
+        version: APP_VERSION,
+      }));
+    }
+    panel.hidden = !panel.hidden;
+  });
   renderRouteView(state.routeView);
 }
 
@@ -246,6 +265,14 @@ function stepRowHTML(row) {
   return `<li class="step"><span class="dot" style="background:${meta.color}"></span><div><strong>${esc(row.label)}${arrive}</strong><br><span class="sub">${esc(meta.label)} · ${row.minutes} min${note}</span></div></li>`;
 }
 
+function reportPanelHTML(report) {
+  const buttons = [];
+  if (FEEDBACK.email) buttons.push(`<a class="rep-btn" href="${esc(buildMailtoUrl(FEEDBACK.email, report.title, report.body))}">Email</a>`);
+  buttons.push(`<a class="rep-btn" href="${esc(buildIssueUrl(FEEDBACK.repo, report.title, report.body))}" target="_blank" rel="noopener">GitHub issue</a>`);
+  if (FEEDBACK.telegram) buttons.push(`<a class="rep-btn" href="${esc(buildTelegramUrl(FEEDBACK.telegram))}" target="_blank" rel="noopener">Telegram</a>`);
+  return `<p class="sub">Something wrong? (closed, wrong directions…)</p><div class="rep-btns">${buttons.join('')}</div>`;
+}
+
 function wireNearbyCats() {
   const cats = ['all', ...Object.keys(CATEGORY_META)];
   const box = $('#nearby-cats');
@@ -295,6 +322,16 @@ function wireA11y() {
   };
   $('#pref-text').addEventListener('change', update);
   $('#pref-contrast').addEventListener('change', update);
+}
+
+function wireAbout() {
+  const btn = $('#report-general');
+  if (!btn) return;
+  const panel = $('#report-general-panel');
+  btn.addEventListener('click', () => {
+    if (panel.hidden) panel.innerHTML = reportPanelHTML(generalReport(APP_VERSION));
+    panel.hidden = !panel.hidden;
+  });
 }
 
 init();

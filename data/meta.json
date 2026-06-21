@@ -1,0 +1,6 @@
+{
+  "coordinateScale": null,
+  "scaleUnit": "grid-units-per-metre",
+  "note": "Shared roughly-to-scale grid for the whole cluster; floors share one coordinate space. Set coordinateScale later to refine a building toward true scale.",
+  "updated": "2026-06-21"
+}

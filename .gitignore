@@ -9,6 +9,9 @@ Thumbs.db
 node_modules/
 npm-debug.log*
 
+# Cloudflare Wrangler build cache
+.wrangler/
+
 # Local Claude Code preview/tooling config
 .claude/
 

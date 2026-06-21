@@ -1,0 +1,17 @@
+{
+  "name": "hospital-wayfinder-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram + Claude wayfinding bot (Cloudflare Worker).",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.69.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  }
+}

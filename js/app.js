@@ -182,7 +182,8 @@ function mapLabel(p, text, color) {
 function mapSVG(level) {
   const levelNodes = nodesOnLevel(nodes, level);
   if (!levelNodes.length) return '<p class="msg">No map for this level.</p>';
-  const t = fitTransform(levelNodes, MAP_W, MAP_H, MAP_PAD);
+  const allCoordNodes = nodes.filter((n) => typeof n.x === 'number' && typeof n.y === 'number');
+  const t = fitTransform(allCoordNodes, MAP_W, MAP_H, MAP_PAD);
   const P = (p) => project(p, t);
 
   // Only draw zones for buildings that span an area (2+ nodes); single-node

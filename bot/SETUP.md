@@ -30,6 +30,29 @@ The bot is a Cloudflare Worker. The PWA stays static; this runs independently.
 6. Point the PWA's Telegram button at the bot: set `telegram: '<your-bot-username>'`
    in `js/feedback.js`, bump the `sw.js` cache, commit, and redeploy the PWA.
 
+## Deploy from Android (no PC) — GitHub Actions
+
+`.github/workflows/deploy-bot.yml` deploys the Worker on every push to `main`, so the
+build runs on GitHub's servers, not your phone. One-time, all doable in a mobile browser:
+
+1. **Cloudflare API token:** dashboard → My Profile → API Tokens → Create Token →
+   "Edit Cloudflare Workers" template (covers Workers Scripts + KV). Copy it.
+2. **GitHub repo secret:** repo → Settings → Secrets and variables → Actions → New
+   repository secret → name `CLOUDFLARE_API_TOKEN`, paste the token.
+3. **KV namespace:** Cloudflare dashboard → Workers & Pages → KV → Create namespace
+   `HW_KV` → copy its id into `bot/wrangler.toml` (`REPLACE_WITH_KV_NAMESPACE_ID`),
+   commit + push.
+4. The push triggers the workflow → it deploys the Worker (Actions tab shows status).
+5. **Runtime secrets:** once the Worker exists, set them in the Cloudflare dashboard
+   → your Worker → Settings → Variables and Secrets: `TELEGRAM_BOT_TOKEN`,
+   `TELEGRAM_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `OWNER_CHAT_ID`, optional
+   `GITHUB_TOKEN`.
+6. **Register the webhook** (step 5 of "One-time setup" above) — run the `curl` from
+   Termux, or use any browser by visiting the `setWebhook` URL with the query params.
+7. Point the PWA's Telegram button at the bot (step 6 above).
+
+After this, deploying changes = `git push` from Termux.
+
 ## Local dev
 `npx wrangler dev` runs the Worker locally; use a tunnel (e.g. `cloudflared`) or the
 Cloudflare dashboard to point a test bot's webhook at it. Send the bot a message and
